@@ -1,4 +1,6 @@
+import tcod as libtcod
 from random import randint
+from entity import Entity
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
 
@@ -13,7 +15,7 @@ class GameMap:
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
         return tiles
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, Max_Monsters_Per_Room):
         rooms = []
         num_rooms = 0
         for r in range(max_rooms):
@@ -43,6 +45,9 @@ class GameMap:
                     else:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
+
+                self.place_entities(new_room, entities, Max_Monsters_Per_Room)
+
                 rooms.append(new_room)
                 num_rooms += 1
 
@@ -62,9 +67,9 @@ class GameMap:
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
 
-    def place_entities(self, room, entities, max_monsters_per_room):
+    def place_entities(self, room, entities, Max_Monsters_Per_Room):
         # Get a random number of monsters
-        number_of_monsters = randint(0, max_monsters_per_room)
+        number_of_monsters = randint(0, Max_Monsters_Per_Room)
 
         for i in range(number_of_monsters):
             # Choose a random location in the room
@@ -73,9 +78,9 @@ class GameMap:
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 if randint(0, 100) < 80:
-                    monster = Entity(x, y, 'o', libtcod.desaturated_green)
+                    monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', blocks=True)
                 else:
-                    monster = Entity(x, y, 'T', libtcod.darker_green)
+                    monster = Entity(x, y, 'T', libtcod.darker_green, 'Troll', blocks=True)
 
                 entities.append(monster)
 
